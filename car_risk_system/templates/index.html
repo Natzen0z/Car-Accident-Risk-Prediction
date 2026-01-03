@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Accident Risk Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 Car Accident Risk Predictor</h1>
+            <p>Predict injury severity based on accident conditions</p>
+        </header>
+
+        <main>
+            <section class="form-section">
+                <h2>Enter Accident Details</h2>
+
+                <form id="prediction-form">
+                    <div class="form-row">
+                        <label for="collision_type">Collision Type</label>
+                        <select id="collision_type" name="collision_type">
+                            <option value="2-Car">2-Car</option>
+                            <option value="1-Car">Single Car</option>
+                            <option value="3+ Cars">3+ Cars</option>
+                            <option value="Pedestrian">Pedestrian</option>
+                            <option value="Cyclist">Cyclist</option>
+                            <option value="Moped/Motorcycle">Motorcycle</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="weekend">Day Type</label>
+                        <select id="weekend" name="weekend">
+                            <option value="Weekday">Weekday</option>
+                            <option value="Weekend">Weekend</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="time_period">Time of Day</label>
+                        <select id="time_period" name="time_period">
+                            <option value="Morning">Morning</option>
+                            <option value="Afternoon">Afternoon</option>
+                            <option value="Evening">Evening</option>
+                            <option value="Night">Night</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="hour">Hour (0-23)</label>
+                        <input type="number" id="hour" name="hour" min="0" max="23" value="12">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="risk_factor">Risk Factor</label>
+                        <select id="risk_factor" name="risk_factor">
+                            <option value="Low Risk">Low Risk</option>
+                            <option value="Medium Risk">Medium Risk</option>
+                            <option value="High Risk">High Risk</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row checkbox-row">
+                        <input type="checkbox" id="rush_hour" name="rush_hour">
+                        <label for="rush_hour">Rush Hour</label>
+                    </div>
+
+                    <button type="submit" class="btn">Predict Risk</button>
+                </form>
+            </section>
+
+            <section class="result-section" id="result-section">
+                <h2>Prediction Result</h2>
+                <div id="result-content">
+                    <p class="placeholder">Submit form to see prediction</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Dataset: Monroe County 2003-2015 | 53,943 records</p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('prediction-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const severityMap = {
+                '1-Car': 1, '2-Car': 2, '3+ Cars': 3,
+                'Pedestrian': 4, 'Cyclist': 4, 'Moped/Motorcycle': 3
+            };
+
+            const formData = {
+                collision_type: document.getElementById('collision_type').value,
+                weekend: document.getElementById('weekend').value,
+                time_period: document.getElementById('time_period').value,
+                hour: parseInt(document.getElementById('hour').value),
+                risk_factor: document.getElementById('risk_factor').value,
+                rush_hour: document.getElementById('rush_hour').checked,
+                severity: severityMap[document.getElementById('collision_type').value] || 2
+            };
+
+            document.getElementById('result-content').innerHTML = '<p>Loading...</p>';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const r = data.result;
+                    document.getElementById('result-content').innerHTML = `
+                        <div class="result-box ${r.risk_level.toLowerCase()}">
+                            <div class="risk-level">${r.risk_level}</div>
+                            <div class="risk-score">Score: ${r.risk_score}/100</div>
+                            <div class="prediction">Predicted: ${r.prediction}</div>
+                        </div>
+                        <div class="probabilities">
+                            <h3>Probabilities</h3>
+                            ${Object.entries(r.probabilities).map(([k, v]) =>
+                        `<div class="prob-row">
+                                    <span>${k}</span>
+                                    <span>${v.toFixed(1)}%</span>
+                                </div>`
+                    ).join('')}
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('result-content').innerHTML = `<p class="error">Error: ${data.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('result-content').innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+
+</html>
