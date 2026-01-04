@@ -55,7 +55,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🚗 Car Accident Risk Predictor</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">Car Accident Risk Predictor</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Predict injury severity using Machine Learning</div>', unsafe_allow_html=True)
 
 # =========================
@@ -63,6 +63,7 @@ st.markdown('<div class="subtitle">Predict injury severity using Machine Learnin
 # =========================
 @st.cache_data
 def load_data():
+    # Import dataset from CSV file
     df = pd.read_csv("../monroe county car crach 2003-2015.csv", encoding='latin-1')
     return df
 
@@ -134,7 +135,7 @@ y = data['Injury_Numeric']
 # SIDEBAR
 # =========================
 with st.sidebar:
-    st.markdown("<h2 style='color:#e74c3c;text-align:center;'>🚗 Car Risk</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color:#e74c3c;text-align:center;'>Car Risk</h2>", unsafe_allow_html=True)
     st.markdown("<div style='text-align:center;color:#888;margin-bottom:1em;'>Accident Risk Prediction</div>", unsafe_allow_html=True)
     menu = st.radio(
         "Menu",
@@ -232,13 +233,13 @@ elif menu == "Predict Risk":
         risk_levels = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
         
         if pred == 3:
-            st.error(f"⚠️ RISK LEVEL: {risk_levels[pred]}")
+            st.error(f"RISK LEVEL: {risk_levels[pred]}")
         elif pred == 2:
-            st.warning(f"⚠️ RISK LEVEL: {risk_levels[pred]}")
+            st.warning(f"RISK LEVEL: {risk_levels[pred]}")
         elif pred == 1:
-            st.info(f"⚠️ RISK LEVEL: {risk_levels[pred]}")
+            st.info(f"RISK LEVEL: {risk_levels[pred]}")
         else:
-            st.success(f"✅ RISK LEVEL: {risk_levels[pred]}")
+            st.success(f"RISK LEVEL: {risk_levels[pred]}")
         
         st.markdown(f"**Predicted Outcome:** {injury_names[pred]}")
         
